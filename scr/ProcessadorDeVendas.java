@@ -1,11 +1,8 @@
 public class ProcessadorDeVendas {
 
-    private static final int TAMANHO_DOCUMENTO = 11;
+    private Cliente cliente;
+    private EstrategiaFrete estrategiaFrete;
 
-    private String numCliente;
-    private String documento;
-    private int tipoCliente;
-    private String endereco;
     private double[] valor;
     private int[] qtd;
 
@@ -15,23 +12,19 @@ public class ProcessadorDeVendas {
     private double totalFinal;
 
     public ProcessadorDeVendas(
-            String numCliente,
-            String documento,
-            int tipoCliente,
-            String endereco,
+            Cliente cliente,
             double[] valor,
-            int[] qtd) {
+            int[] qtd,
+            EstrategiaFrete estrategiaFrete) {
 
-        this.numCliente = numCliente;
-        this.documento = documento;
-        this.tipoCliente = tipoCliente;
-        this.endereco = endereco;
+        this.cliente = cliente;
         this.valor = valor;
         this.qtd = qtd;
+        this.estrategiaFrete = estrategiaFrete;
     }
 
     public void processar() {
-        if (documento == null || documento.length() != TAMANHO_DOCUMENTO) {
+        if (cliente == null || !cliente.isDocumentoValido()) {
             System.out.println("Erro: Documento invalido.");
             return;
         }
@@ -43,19 +36,17 @@ public class ProcessadorDeVendas {
         total = calculadoraImpostos.getTotal();
         impostos = calculadoraImpostos.getImpostos();
 
-        CalculadoraFrete calculadoraFrete = new CalculadoraFrete();
-        frete = calculadoraFrete.calcular(tipoCliente, endereco);
+        frete = estrategiaFrete.calcularFrete(cliente);
 
         totalFinal = total + impostos + frete;
 
         ImpressoraRecibo impressora = new ImpressoraRecibo();
         impressora.exibir(
-                numCliente,
-                documento,
+                cliente.getNome(),
+                cliente.getDocumento(),
                 total,
                 impostos,
                 frete,
-                totalFinal
-        );
+                totalFinal);
     }
 }
